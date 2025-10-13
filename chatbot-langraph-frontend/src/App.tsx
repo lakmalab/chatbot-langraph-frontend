@@ -6,8 +6,6 @@ import PensionPage from './pages/PensionPage'
 
 function App() {
 
-  const [count, setCount] = useState(0)
-
   return (
     <>
       <PensionPage/>
