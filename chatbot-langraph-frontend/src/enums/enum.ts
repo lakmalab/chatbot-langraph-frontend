@@ -1,6 +1,6 @@
 export const enum Sender {
-      BOT = "BOT",
-      USER = "USER", 
+      assistant = "assistant",
+      user = "user", 
 }
 
 export enum Status {

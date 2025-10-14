@@ -3,26 +3,35 @@ import { useState, useEffect } from "react";
 import ChatBotInterface from "../components/ChatBotInterface";
 import type { Message } from "../types/Message";
 import { Sender, Status } from "../enums/enum";
+import chatService, { ChatService } from "../service/chatService";
 
 function PensionPage() {
   const [IsOpen, setIsOpen] = useState(false);
   const [message, setMessage] = useState<Message[]>([]);
 
-  const messages: Message[] = [
-    {
-      content: "Hi, how can I help you?",
-      sender: Sender.BOT,
-      status: Status.FINISHED,
-    },
-    {
-      content: "Hi, how can I help you?",
-      sender: Sender.USER,
-      status: Status.FINISHED,
-    },
-  ];
-
   useEffect(() => {
-    setMessage(messages);
+    chatService
+      .fetchMessageHistory()
+      .then((data: any) => {
+        const fetchedMessages: Message[] = Array.isArray(data)
+          ? data
+          : Array.isArray(data.messages)
+          ? data.messages
+          : [];
+
+        const initialMessages: Message[] = [
+          {
+            content: "Hi, how can I help you?",
+            sender: Sender.assistant,
+            status: Status.FINISHED,
+          },
+          ...fetchedMessages,
+        ];
+        console.log("fetched data:", initialMessages);
+
+        setMessage(initialMessages);
+      })
+      .catch((err) => console.error("Failed to fetch messages:", err));
   }, []);
 
   return (

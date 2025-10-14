@@ -5,8 +5,8 @@ import type { Message } from "../types/Message";
 
 
 function ChatBubble(prop : Message) {
- const isBot = prop.sender === Sender.BOT;
- console.log("Sender value:", prop.sender, Sender.BOT);
+ const isBot = prop.sender === Sender.assistant;
+ console.log("Sender value:", prop.sender, Sender.assistant);
     return (
     <>
       <div className={`chat ${isBot ? "chat-start" : "chat-end"}`}>
