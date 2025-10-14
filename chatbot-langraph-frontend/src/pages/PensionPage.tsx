@@ -9,30 +9,14 @@ function PensionPage() {
   const [IsOpen, setIsOpen] = useState(false);
   const [message, setMessage] = useState<Message[]>([]);
 
-  useEffect(() => {
-    chatService
-      .fetchMessageHistory()
-      .then((data: any) => {
-        const fetchedMessages: Message[] = Array.isArray(data)
-          ? data
-          : Array.isArray(data.messages)
-          ? data.messages
-          : [];
+ useEffect(() => {
+  const loadMessages = async () => {
+    const fetched = await chatService.fetchMessageHistory();
+    setMessage(fetched);
+  };
+  loadMessages();
+}, []);
 
-        const initialMessages: Message[] = [
-          {
-            content: "Hi, how can I help you?",
-            sender: Sender.assistant,
-            status: Status.FINISHED,
-          },
-          ...fetchedMessages,
-        ];
-        console.log("fetched data:", initialMessages);
-
-        setMessage(initialMessages);
-      })
-      .catch((err) => console.error("Failed to fetch messages:", err));
-  }, []);
 
   return (
     <>

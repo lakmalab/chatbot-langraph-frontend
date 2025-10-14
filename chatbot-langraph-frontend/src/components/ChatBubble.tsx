@@ -1,5 +1,5 @@
 import { Sender, Status } from "../enums/enum";
-import { BotMessageSquare, UserRoundPen, MoreVertical } from "lucide-react";
+import { BotMessageSquare, UserRoundPen } from "lucide-react";
 import type { Message } from "../types/Message";
 
 function ChatBubble(prop: Message) {
@@ -68,13 +68,7 @@ function ChatBubble(prop: Message) {
           <UserRoundPen className="text-gray-700 w-5 h-5" />
         </div>
       )}
-
-      <button
-        type="button"
-        className="inline-flex self-center items-center p-2 text-sm font-medium text-center text-gray-900 bg-white rounded-lg hover:bg-gray-100 focus:ring-4 focus:outline-none dark:text-white focus:ring-gray-50 dark:bg-gray-900 dark:hover:bg-gray-800 dark:focus:ring-gray-600"
-      >
-        <MoreVertical className="w-4 h-4 text-gray-500 dark:text-gray-400" />
-      </button>
+    
     </div>
   );
 }
