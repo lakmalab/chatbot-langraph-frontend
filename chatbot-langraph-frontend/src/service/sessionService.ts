@@ -2,7 +2,7 @@ import type { Session, conversation,SessionData } from "../types/Session";
 import { apiRequest } from "./apiService";
 
 //const sessionId = localStorage.getItem("sessionId");
-const sessionId = "b31e7a4b-d6eb-4264-b1c0-d5545f53d035"
+const sessionId = "7ebba939-e14d-4ae8-928f-f05438e49e41"
 
 export class SessionService {
 

@@ -26,6 +26,7 @@ export class ChatService {
         : [];
 
       return [...initialMessages, ...fetchedMessages];
+      
     } catch (error) {
       console.error("Failed to fetch messages:", error);
       return initialMessages; 
@@ -33,12 +34,14 @@ export class ChatService {
   };
 
   
-  sendMessage = async (message: SendMessage): Promise<void> => {
+sendMessage = async (message: SendMessage): Promise<Message> => {
   try {
-    const data = await apiRequest<any>(`/chat/message`, "POST", message); 
+    const data = await apiRequest<Message>(`/chat/message`, "POST", message); 
     console.log("Message sent successfully:", data);
+    return data;
   } catch (error) {
     console.error("Failed to send message:", error);
+    return "" as unknown as Message;
   }
 };
 }

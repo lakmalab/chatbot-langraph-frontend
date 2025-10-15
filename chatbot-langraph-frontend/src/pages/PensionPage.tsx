@@ -7,16 +7,6 @@ import chatService, { ChatService } from "../service/chatService";
 
 function PensionPage() {
   const [IsOpen, setIsOpen] = useState(false);
-  const [message, setMessage] = useState<Message[]>([]);
-
- useEffect(() => {
-  const loadMessages = async () => {
-    const fetched = await chatService.fetchMessageHistory();
-    setMessage(fetched);
-  };
-  loadMessages();
-}, []);
-
 
   return (
     <>
@@ -35,7 +25,7 @@ function PensionPage() {
       </button>
       {IsOpen && (
         <div className="fixed bottom-25 right-6 w-96 h-[600px] bg-white rounded-lg shadow-2xl flex flex-col z-30  border-1 ">
-          <ChatBotInterface messages={message} />
+          <ChatBotInterface />
         </div>
       )}
     </>

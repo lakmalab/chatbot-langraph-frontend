@@ -6,6 +6,7 @@ export const enum Sender {
 export enum Status {
     SENDING,
     PENDINDG, 
-    FINISHED
+    FINISHED,
+    FAILED
 }
 

@@ -1,38 +1,86 @@
 import { Bot, Send } from "lucide-react";
 import ChatBubble from "./ChatBubble";
 import type { Message } from "../types/Message";
-import { useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import chatService from "../service/chatService";
+import { Sender, Status } from "../enums/enum";
 
-interface ChatBotInterfaceProps {
-  messages: Message[];
-  onSendMessage?: (message: string) => void;
-}
-
-function ChatBotInterface({ messages, onSendMessage }: ChatBotInterfaceProps) {
+function ChatBotInterface() {
   const [inputValue, setInputValue] = useState("");
+  const [message, setMessage] = useState<Message[]>([]);
+  const [isTyping, setIsTyping] = useState(false);
+  const messagesEndRef = useRef<HTMLDivElement>(null);
 
-  
-  const handleSend = () => {
+  useEffect(() => {
+    const loadMessages = async () => {
+      const fetched = await chatService.fetchMessageHistory();
+      setMessage(fetched);
+    };
+    loadMessages();
+  }, []);
+
+  useEffect(() => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [message, isTyping]);
+
+  const handleSend = async () => {
     //const sessionId = localStorage.getItem("sessionId");
-    const sessionId = "b31e7a4b-d6eb-4264-b1c0-d5545f53d035"
+    const sessionId = "7ebba939-e14d-4ae8-928f-f05438e49e41";
     const trimmed = inputValue.trim();
-    let message = {
-      session_id: sessionId || "",
-      message: trimmed,
-      conversation_id: Number(localStorage.getItem("ConversationId")) || 11,
-      scheme_type: "pension",
-    }
-    console.log("Sending message:", message);
-    chatService.sendMessage(message);
-    
     if (trimmed.length === 0) return;
 
-    if (onSendMessage) {
-      onSendMessage(trimmed);
-    }
+    const userMessage: Message = {
+      content: trimmed,
+      sender: Sender.user,
+      status: Status.SENDING,
+    };
 
+    setMessage((prev) => [...prev, userMessage]);
     setInputValue("");
+
+    const typingMessage: Message = {
+      content: "...",
+      sender: Sender.assistant,
+      status: Status.SENDING,
+    };
+    setMessage((prev) => [...prev, typingMessage]);
+
+    try {
+      const payload = {
+        session_id: sessionId,
+        message: trimmed,
+        conversation_id: Number(localStorage.getItem("ConversationId")) || 11,
+        scheme_type: "pension",
+      };
+
+      const response = await chatService.sendMessage(payload);
+
+      const assistantMessage: Message = {
+        content: response.response || "No reply from server.",
+        sender: Sender.assistant,
+        status: Status.FINISHED,
+      };
+
+      setMessage((prev) => {
+        const updated = prev
+          .map((m, i) =>
+            i === prev.length - 2 
+              ? { ...m, status: Status.FINISHED }
+              : m
+          )
+          .slice(0, -1); 
+        return [...updated, assistantMessage];
+      });
+    } catch (error) {
+      console.error("Error sending message:", error);
+
+      setMessage((prev) => {
+        const updated = prev.map((m, i) =>
+          i === prev.length - 2 ? { ...m, status: Status.FAILED } : m
+        );
+        return updated;
+      });
+    }
   };
 
   const handleKeyPress = (e: React.KeyboardEvent<HTMLInputElement>) => {
@@ -48,13 +96,15 @@ function ChatBotInterface({ messages, onSendMessage }: ChatBotInterfaceProps) {
           </div>
           <div>
             <h3 className="font-semibold">AAIB Chat Assistant</h3>
-            <p className="text-xs text-blue-100">Online</p>
+            <p className="text-xs text-blue-100">
+              {isTyping ? "Typing..." : "Online"}
+            </p>
           </div>
         </div>
       </div>
 
       <div className="p-4 space-y-3 overflow-y-auto max-h-[500px] bg-gray-50">
-        {messages.map((msg, index) => (
+        {message.map((msg, index) => (
           <ChatBubble
             key={index}
             content={msg.content}
@@ -62,6 +112,16 @@ function ChatBotInterface({ messages, onSendMessage }: ChatBotInterfaceProps) {
             status={msg.status}
           />
         ))}
+
+        {isTyping && (
+          <div className="flex justify-start">
+            <div className="bg-gray-200 text-gray-800 px-4 py-2 rounded-2xl animate-pulse w-fit">
+              <span className="tracking-widest">...</span>
+            </div>
+          </div>
+        )}
+
+        <div ref={messagesEndRef} />
       </div>
 
       <div className="p-3 border-t bg-gray-100 flex items-center gap-2">
