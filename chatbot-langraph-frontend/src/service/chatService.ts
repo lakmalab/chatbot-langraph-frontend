@@ -1,38 +1,46 @@
-import type { Message } from "../types/Message";
+import type { Message, SendMessage } from "../types/Message";
 import { apiRequest } from "./apiService";
 import { Sender, Status } from "../enums/enum";
 
 
 
+const initialMessages: Message[] = [
+  {
+    content: "Hi, how can I help you?",
+    sender: Sender.assistant,
+    status: Status.FINISHED,
+  },
+];
 
 export class ChatService {
-
   fetchMessageHistory = async (): Promise<Message[]> => {
     try {
       const ConversationId = localStorage.getItem("ConversationId");
       const data = await apiRequest<any>(`/chat/history/${ConversationId}`, "GET");
-       console.log("HELLO",data)
+      console.log("HELLO", data);
+
       const fetchedMessages: Message[] = Array.isArray(data)
         ? data
         : Array.isArray(data.messages)
         ? data.messages
         : [];
 
-      const initialMessages: Message[] = [
-        {
-          content: "Hi, how can I help you?",
-          sender: Sender.assistant,
-          status: Status.FINISHED,
-        },
-        ...fetchedMessages,
-      ];
-
-      return initialMessages;
+      return [...initialMessages, ...fetchedMessages];
     } catch (error) {
       console.error("Failed to fetch messages:", error);
-      return [];
+      return initialMessages; 
     }
   };
+
+  
+  sendMessage = async (message: SendMessage): Promise<void> => {
+  try {
+    const data = await apiRequest<any>(`/chat/message`, "POST", message); 
+    console.log("Message sent successfully:", data);
+  } catch (error) {
+    console.error("Failed to send message:", error);
+  }
+};
 }
 
 export default new ChatService();

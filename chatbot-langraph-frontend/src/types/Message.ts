@@ -5,3 +5,10 @@ export interface Message {
   status: Status
   content:String
 }
+
+export interface SendMessage {
+  session_id: string
+  message: string
+  conversation_id:Number
+  scheme_type:String
+}

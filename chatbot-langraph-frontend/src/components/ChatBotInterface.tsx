@@ -2,6 +2,7 @@ import { Bot, Send } from "lucide-react";
 import ChatBubble from "./ChatBubble";
 import type { Message } from "../types/Message";
 import { useState } from "react";
+import chatService from "../service/chatService";
 
 interface ChatBotInterfaceProps {
   messages: Message[];
@@ -11,8 +12,20 @@ interface ChatBotInterfaceProps {
 function ChatBotInterface({ messages, onSendMessage }: ChatBotInterfaceProps) {
   const [inputValue, setInputValue] = useState("");
 
+  
   const handleSend = () => {
+    //const sessionId = localStorage.getItem("sessionId");
+    const sessionId = "b31e7a4b-d6eb-4264-b1c0-d5545f53d035"
     const trimmed = inputValue.trim();
+    let message = {
+      session_id: sessionId || "",
+      message: trimmed,
+      conversation_id: Number(localStorage.getItem("ConversationId")) || 11,
+      scheme_type: "pension",
+    }
+    console.log("Sending message:", message);
+    chatService.sendMessage(message);
+    
     if (trimmed.length === 0) return;
 
     if (onSendMessage) {
