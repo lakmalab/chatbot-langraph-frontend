@@ -19,14 +19,19 @@ export class ChatService {
       const data = await apiRequest<any>(`/chat/history/${ConversationId}`, "GET");
       console.log("HELLO", data);
 
-      const fetchedMessages: Message[] = Array.isArray(data)
+      const fetchedData = Array.isArray(data)
         ? data
         : Array.isArray(data.messages)
         ? data.messages
         : [];
 
+      const fetchedMessages: Message[] = fetchedData.map((msg: any) => ({
+        sender: msg.role === "assistant" ? Sender.assistant : Sender.user,
+        content: msg.content,
+      }));
+
       return [...initialMessages, ...fetchedMessages];
-      
+
     } catch (error) {
       console.error("Failed to fetch messages:", error);
       return initialMessages; 

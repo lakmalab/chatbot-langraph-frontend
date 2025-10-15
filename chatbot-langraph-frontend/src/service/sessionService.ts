@@ -1,11 +1,11 @@
 import type { Session, conversation,SessionData } from "../types/Session";
 import { apiRequest } from "./apiService";
 
-//const sessionId = localStorage.getItem("sessionId");
-const sessionId = "7ebba939-e14d-4ae8-928f-f05438e49e41"
+const sessionId = localStorage.getItem("sessionId");
+//const sessionId = "7ebba939-e14d-4ae8-928f-f05438e49e41"
 
 export class SessionService {
-
+  
   fetchSession = async (): Promise<Session> => {
     try {
       const data = await apiRequest<Session>("/session/create", "POST");
@@ -28,7 +28,7 @@ export class SessionService {
     const data = await apiRequest<SessionData>(`/chat/conversations/${sessionId}`, "GET");
     console.warn("data",data);
     if (data?.conversations?.length) {
-      const conversation = data.conversations[0]; // take the first conversation
+      const conversation = data.conversations[0]; 
       localStorage.setItem("ConversationId", conversation.id.toString());
       console.log("Conversation ID:", conversation.id);
       return conversation;

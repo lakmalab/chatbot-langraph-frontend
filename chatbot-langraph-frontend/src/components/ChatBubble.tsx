@@ -2,6 +2,18 @@ import { Sender, Status } from "../enums/enum";
 import { BotMessageSquare, UserRoundPen } from "lucide-react";
 import type { Message } from "../types/Message";
 
+function formatMessage(content: string) {
+  // Convert markdown-like patterns to HTML
+  return content
+    .replace(/\n/g, "<br/>") 
+    .replace(/✅/g, "✅") 
+    .replace(/1️⃣/g, "1️⃣")
+    .replace(/2️⃣/g, "2️⃣")
+    .replace(/3️⃣/g, "3️⃣")
+    .replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>") 
+    .replace(/_/g, "<i>$1</i>"); 
+}
+
 function ChatBubble(prop: Message) {
   const isBot = prop.sender === Sender.assistant;
 
@@ -18,13 +30,12 @@ function ChatBubble(prop: Message) {
       )}
 
       <div
-        className={`flex flex-col w-full max-w-[320px] leading-1.5 p-4 rounded-e-xl rounded-es-xl shadow-sm ${
+        className={`flex flex-col w-full max-w-[320px] leading-1.5 p-4 shadow-sm ${
           isBot
-            ? "bg-gray-100 border border-gray-200 dark:bg-gray-700 dark:border-gray-600"
-            : "bg-blue-600 text-white dark:bg-blue-500"
+            ? "bg-gray-100 border border-gray-200 dark:bg-gray-700 dark:border-gray-600 rounded-2xl rounded-tl-none"
+            : "bg-blue-600 text-white dark:bg-blue-500 rounded-2xl rounded-tr-none"
         }`}
       >
-
         <div className="flex items-center space-x-2 rtl:space-x-reverse">
           <span
             className={`text-sm font-semibold ${
@@ -38,17 +49,16 @@ function ChatBubble(prop: Message) {
               isBot ? "text-gray-500 dark:text-gray-400" : "text-gray-200"
             }`}
           >
-            12:45
+            00:00 {/* TODO: revise message schema to include time */}
           </span>
         </div>
 
-        <p
-          className={`text-sm font-normal py-2.5 ${
+         <div
+          className={`text-sm font-normal py-2.5 space-y-1 ${
             isBot ? "text-gray-900 dark:text-white" : "text-white"
           }`}
-        >
-          {prop.content}
-        </p>
+          dangerouslySetInnerHTML={{ __html: formatMessage(prop.content.toString()) }}
+        ></div>
 
         <span
           className={`text-sm font-normal ${
@@ -68,7 +78,6 @@ function ChatBubble(prop: Message) {
           <UserRoundPen className="text-gray-700 w-5 h-5" />
         </div>
       )}
-    
     </div>
   );
 }

@@ -1,9 +1,7 @@
 import { MessageCircle, X } from "lucide-react";
 import { useState, useEffect } from "react";
 import ChatBotInterface from "../components/ChatBotInterface";
-import type { Message } from "../types/Message";
-import { Sender, Status } from "../enums/enum";
-import chatService, { ChatService } from "../service/chatService";
+
 
 function PensionPage() {
   const [IsOpen, setIsOpen] = useState(false);

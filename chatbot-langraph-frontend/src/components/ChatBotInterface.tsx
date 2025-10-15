@@ -14,6 +14,7 @@ function ChatBotInterface() {
   useEffect(() => {
     const loadMessages = async () => {
       const fetched = await chatService.fetchMessageHistory();
+      console.log(fetched);
       setMessage(fetched);
     };
     loadMessages();
@@ -24,8 +25,8 @@ function ChatBotInterface() {
   }, [message, isTyping]);
 
   const handleSend = async () => {
-    //const sessionId = localStorage.getItem("sessionId");
-    const sessionId = "7ebba939-e14d-4ae8-928f-f05438e49e41";
+    const sessionId = localStorage.getItem("sessionId");
+    //const sessionId = "7ebba939-e14d-4ae8-928f-f05438e49e41";
     const trimmed = inputValue.trim();
     if (trimmed.length === 0) return;
 
@@ -41,7 +42,7 @@ function ChatBotInterface() {
     const typingMessage: Message = {
       content: "...",
       sender: Sender.assistant,
-      status: Status.SENDING,
+      status: Status.PENDINDG,
     };
     setMessage((prev) => [...prev, typingMessage]);
 
