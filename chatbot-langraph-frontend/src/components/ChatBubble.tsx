@@ -5,13 +5,13 @@ import type { Message } from "../types/Message";
 function formatMessage(content: string) {
   // Convert markdown-like patterns to HTML
   return content
-    .replace(/\n/g, "<br/>") 
-    .replace(/✅/g, "✅") 
+    .replace(/\n/g, "<br/>")
+    .replace(/✅/g, "✅")
     .replace(/1️⃣/g, "1️⃣")
     .replace(/2️⃣/g, "2️⃣")
     .replace(/3️⃣/g, "3️⃣")
-    .replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>") 
-    .replace(/_/g, "<i>$1</i>"); 
+    .replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>")
+    .replace(/_/g, "<i>$1</i>");
 }
 
 function ChatBubble(prop: Message) {
@@ -49,15 +49,17 @@ function ChatBubble(prop: Message) {
               isBot ? "text-gray-500 dark:text-gray-400" : "text-gray-200"
             }`}
           >
-            00:00 {/* TODO: revise message schema to include time */}
+            {/*  00:00 TODO: revise message schema to include time */}
           </span>
         </div>
 
-         <div
+        <div
           className={`text-sm font-normal py-2.5 space-y-1 ${
             isBot ? "text-gray-900 dark:text-white" : "text-white"
           }`}
-          dangerouslySetInnerHTML={{ __html: formatMessage(prop.content.toString()) }}
+          dangerouslySetInnerHTML={{
+            __html: formatMessage(prop.content.toString()),
+          }}
         ></div>
 
         <span

@@ -1,15 +1,17 @@
-import { Bot, Send } from "lucide-react";
+import { Bot, Send, CirclePlus } from "lucide-react";
 import ChatBubble from "./ChatBubble";
 import type { Message } from "../types/Message";
 import { useEffect, useState, useRef } from "react";
 import chatService from "../service/chatService";
 import { Sender, Status } from "../enums/enum";
+import sessionService from "../service/sessionService";
 
 function ChatBotInterface() {
   const [inputValue, setInputValue] = useState("");
   const [message, setMessage] = useState<Message[]>([]);
   const [isTyping, setIsTyping] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const sessionId = localStorage.getItem("sessionId");
 
   useEffect(() => {
     const loadMessages = async () => {
@@ -24,8 +26,21 @@ function ChatBotInterface() {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [message, isTyping]);
 
+  const handleadd = async () => {
+    try {
+      const response = await sessionService.addNewconversation();
+
+      setMessage([]);
+      setInputValue("");
+      setIsTyping(false);
+
+      const fetched = await chatService.fetchMessageHistory();
+      setMessage(fetched);
+    } catch (error) {
+      console.error("Failed to add new conversation:", error);
+    }
+  };
   const handleSend = async () => {
-    const sessionId = localStorage.getItem("sessionId");
     //const sessionId = "7ebba939-e14d-4ae8-928f-f05438e49e41";
     const trimmed = inputValue.trim();
     if (trimmed.length === 0) return;
@@ -65,11 +80,9 @@ function ChatBotInterface() {
       setMessage((prev) => {
         const updated = prev
           .map((m, i) =>
-            i === prev.length - 2 
-              ? { ...m, status: Status.FINISHED }
-              : m
+            i === prev.length - 2 ? { ...m, status: Status.FINISHED } : m
           )
-          .slice(0, -1); 
+          .slice(0, -1);
         return [...updated, assistantMessage];
       });
     } catch (error) {
@@ -89,22 +102,53 @@ function ChatBotInterface() {
   };
 
   return (
-    <div className="flex flex-col border rounded-xl overflow-hidden bg-white shadow-sm">
-      <div className="bg-blue-600 text-white p-4 rounded-t-lg flex items-center justify-between">
+    <div className="flex flex-col border border-gray-200 rounded-2xl overflow-hidden bg-white shadow-lg">
+      <div
+        className="bg-gradient-to-r from-blue-600 to-blue-700
+       text-white p-5 flex items-center justify-between"
+      >
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 bg-blue-500 rounded-full flex items-center justify-center">
-            <Bot />
+          <div
+            className="w-12 h-12 bg-white/20 backdrop-blur-sm rounded-full flex 
+          items-center justify-center ring-2 ring-white/30"
+          >
+            <Bot className="w-6 h-6" />
           </div>
+
           <div>
-            <h3 className="font-semibold">AAIB Chat Assistant</h3>
-            <p className="text-xs text-blue-100">
-              {isTyping ? "Typing..." : "Online"}
-            </p>
+            <h3 className="font-semibold text-lg">AAIB Chat Assistant</h3>
+
+            <div className="flex items-center gap-2">
+              <div
+                className={`w-2 h-2 rounded-full ${
+                  isTyping ? "bg-yellow-300 animate-pulse" : "bg-green-300"
+                }`}
+              />
+              <p className="text-sm text-blue-50">
+                {isTyping ? "Typing..." : "Online"}
+              </p>
+            </div>
           </div>
+        </div>
+        <div
+          className="w-12 h-12 bg-white/20 backdrop-blur-sm rounded-full flex 
+          items-center justify-center ring-2 ring-white/30"
+        >
+          <button
+            onClick={handleadd}
+            className="bg-gradient-to-r from-blue-600 to-blue-900
+           hover:from-blue-700 hover:to-blue-800 text-white p-3 rounded-full  flex items-center justify-center transition-all shadow-md hover:shadow-lg active:scale-95"
+            aria-label="add conversations"
+          >
+            <CirclePlus className="w-5 h-5" />
+          </button>
         </div>
       </div>
 
-      <div className="p-4 space-y-3 overflow-y-auto max-h-[500px] bg-gray-50">
+      <div
+        className="p-5 space-y-4 overflow-y-auto max-h-[500px]
+       bg-gradient-to-b from-gray-50 to-white"
+      >
         {message.map((msg, index) => (
           <ChatBubble
             key={index}
@@ -116,8 +160,24 @@ function ChatBotInterface() {
 
         {isTyping && (
           <div className="flex justify-start">
-            <div className="bg-gray-200 text-gray-800 px-4 py-2 rounded-2xl animate-pulse w-fit">
-              <span className="tracking-widest">...</span>
+            <div
+              className="bg-gray-200 text-gray-800 px-5 py-3 rounded-2xl
+             rounded-tl-sm animate-pulse w-fit shadow-sm"
+            >
+              <span className="flex gap-1">
+                <span
+                  className="w-2 h-2 bg-gray-500 rounded-full animate-bounce"
+                  style={{ animationDelay: "0ms" }}
+                />
+                <span
+                  className="w-2 h-2 bg-gray-500 rounded-full animate-bounce"
+                  style={{ animationDelay: "150ms" }}
+                />
+                <span
+                  className="w-2 h-2 bg-gray-500 rounded-full animate-bounce"
+                  style={{ animationDelay: "300ms" }}
+                />
+              </span>
             </div>
           </div>
         )}
@@ -125,18 +185,20 @@ function ChatBotInterface() {
         <div ref={messagesEndRef} />
       </div>
 
-      <div className="p-3 border-t bg-gray-100 flex items-center gap-2">
+      <div className="p-4 border-t border-gray-200 bg-white flex items-center gap-3">
         <input
           type="text"
           placeholder="Type a message..."
           value={inputValue}
           onChange={(e) => setInputValue(e.target.value)}
           onKeyDown={handleKeyPress}
-          className="flex-1 p-2.5 rounded-xl border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-400"
+          className="flex-1 p-3 rounded-xl border border-gray-300 
+          focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all placeholder:text-gray-400"
         />
         <button
           onClick={handleSend}
-          className="bg-blue-600 hover:bg-blue-700 text-white p-2.5 rounded-xl flex items-center justify-center transition-colors"
+          className="bg-gradient-to-r from-blue-600 to-blue-700
+           hover:from-blue-700 hover:to-blue-800 text-white p-3 rounded-xl flex items-center justify-center transition-all shadow-md hover:shadow-lg active:scale-95"
           aria-label="send message"
         >
           <Send className="w-5 h-5" />
