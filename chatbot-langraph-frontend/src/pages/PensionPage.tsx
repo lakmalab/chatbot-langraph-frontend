@@ -27,9 +27,10 @@ function PensionPage() {
         </button>
       </div>
       {IsOpen && (
-        <div className="fixed bottom-25 right-6 w-96   rounded-lg shadow-2xl flex flex-col z-30  ">
-          <ChatBotInterface />
-        </div>
+       <div className="fixed bottom-1 top-3 right-25 w-96 max-h-[100vh] rounded-2xl shadow-2xl flex flex-col z-30 bg-gray-900/90 backdrop-blur-md overflow-hidden">
+  <ChatBotInterface />
+</div>
+
       )}
     </>
   );
