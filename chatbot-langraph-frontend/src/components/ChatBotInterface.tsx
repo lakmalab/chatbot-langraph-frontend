@@ -38,6 +38,7 @@ function ChatBotInterface() {
     if (!isLoading) inputRef.current?.focus();
   }, [isLoading]);
 
+
   const loadMessages = async () => {
     try {
       setIsTyping(true);
@@ -47,6 +48,7 @@ function ChatBotInterface() {
       setIsTyping(false);
     }
   };
+
 
   const handleSendMessage = async (messageText?: string) => {
     const textToSend = messageText || inputValue.trim();
@@ -97,6 +99,7 @@ function ChatBotInterface() {
     }
   };
 
+
   const handleAddConversation = async () => {
     try {
       await sessionService.addNewconversation();
@@ -108,6 +111,7 @@ function ChatBotInterface() {
       console.error("Error adding new conversation:", err);
     }
   };
+
 
   const handleDropdown = async () => {
     try {
@@ -121,6 +125,7 @@ function ChatBotInterface() {
     }
   };
 
+
   const handleConversationSelect = async (conversationId: number) => {
     localStorage.setItem("ConversationId", conversationId.toString());
     setShowDropdown(false);
@@ -130,6 +135,7 @@ function ChatBotInterface() {
     await loadMessages();
   };
 
+
   const handleKeyPress = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault();
@@ -137,21 +143,39 @@ function ChatBotInterface() {
     }
   };
 
+
+  const handleConfirm = async (messageId: string) => {
+    console.log("✅ Confirm clicked for:", messageId);
+    await handleSendMessage("Confirm");
+    setMessages((prev) =>
+      prev.map((m, i) =>
+        i.toString() === messageId ? { ...m, requiresConfirmation: false } : m
+      )
+    );
+  };
+
+
+  const handleCancel = async (messageId: string) => {
+    console.log("❌ Cancel clicked for:", messageId);
+    await handleSendMessage("Cancel");
+    setMessages((prev) =>
+      prev.map((m, i) =>
+        i.toString() === messageId ? { ...m, requiresConfirmation: false } : m
+      )
+    );
+  };
+
   return (
     <div className="flex flex-col h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
-      {/* 🌈 Modern Header with Conversation Controls */}
+      {/* 🌈 Header */}
       <div className="bg-white dark:bg-gray-800 shadow-lg border-b border-gray-200 dark:border-gray-700 relative">
-        <div className="max-w-4xl mx-auto px-6  py-4 flex items-center gap-3">
+        <div className="max-w-4xl mx-auto px-6 py-4 flex items-center gap-3">
           <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center shadow-lg">
             <Sparkles className="w-5 h-5 text-white" />
           </div>
           <div>
-            <h1 className="text-xl font-bold text-gray-900 dark:text-white">
-              Pension Assistant
-            </h1>
-            <p className="text-xs text-gray-500 dark:text-gray-400">
-              AI-powered pension advisor
-            </p>
+            <h1 className="text-xl font-bold text-gray-900 dark:text-white">Pension Assistant</h1>
+            <p className="text-xs text-gray-500 dark:text-gray-400">AI-powered pension advisor</p>
           </div>
 
           <div className="ml-auto flex items-center gap-2 relative">
@@ -162,25 +186,14 @@ function ChatBotInterface() {
               </div>
             )}
 
-            {/* Dropdown Toggle */}
-            <button
-              onClick={handleDropdown}
-              className="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700"
-              aria-label="Show conversations"
-            >
+            <button onClick={handleDropdown} className="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700">
               <ArrowDown className="w-5 h-5 text-gray-600 dark:text-gray-300" />
             </button>
 
-            {/* New Conversation Button */}
-            <button
-              onClick={handleAddConversation}
-              className="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700"
-              aria-label="Add conversation"
-            >
+            <button onClick={handleAddConversation} className="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700">
               <CirclePlus className="w-5 h-5 text-gray-600 dark:text-gray-300" />
             </button>
 
-            {/* Dropdown List */}
             {showDropdown && (
               <div className="absolute right-0 top-12 w-64 bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-200 rounded-xl shadow-lg border border-gray-200 dark:border-gray-700 z-50 max-h-60 overflow-y-auto">
                 {conversations.length > 0 ? (
@@ -194,9 +207,7 @@ function ChatBotInterface() {
                     </button>
                   ))
                 ) : (
-                  <p className="p-3 text-gray-500 text-center">
-                    No conversations
-                  </p>
+                  <p className="p-3 text-gray-500 text-center">No conversations</p>
                 )}
               </div>
             )}
@@ -204,7 +215,7 @@ function ChatBotInterface() {
         </div>
       </div>
 
-      {/* 🧠 Messages Section */}
+      {/* 💬 Chat Section */}
       <div className="flex-1 overflow-y-auto">
         <div className="max-w-4xl mx-auto px-6 py-6 space-y-6">
           {messages.length === 0 ? (
@@ -212,17 +223,19 @@ function ChatBotInterface() {
               <div className="w-20 h-20 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center shadow-2xl mb-6">
                 <Sparkles className="w-10 h-10 text-white" />
               </div>
-              <h2 className="text-2xl font-bold text-gray-800 dark:text-white mb-2">
-                Welcome to Pension Assistant
-              </h2>
+              <h2 className="text-2xl font-bold text-gray-800 dark:text-white mb-2">Welcome to Pension Assistant</h2>
               <p className="text-gray-600 dark:text-gray-400 max-w-md">
-                I'm here to help you understand and calculate your pension
-                benefits. Ask me anything about premiums, payouts, or eligibility!
+                I'm here to help you understand and calculate your pension benefits. Ask me anything about premiums, payouts, or eligibility!
               </p>
             </div>
           ) : (
             messages.map((message, index) => (
-              <ChatBubble key={index} {...message} />
+              <ChatBubble
+                key={index}
+                {...message}
+                onConfirm={() => handleConfirm(index.toString())}
+                onCancel={() => handleCancel(index.toString())}
+              />
             ))
           )}
 
@@ -234,14 +247,8 @@ function ChatBotInterface() {
               <div className="flex items-center gap-2 px-4 py-3 bg-white dark:bg-gray-700 rounded-2xl rounded-tl-none shadow-md">
                 <div className="flex gap-1">
                   <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" />
-                  <div
-                    className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"
-                    style={{ animationDelay: "150ms" }}
-                  />
-                  <div
-                    className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"
-                    style={{ animationDelay: "300ms" }}
-                  />
+                  <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: "150ms" }} />
+                  <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: "300ms" }} />
                 </div>
               </div>
             </div>
@@ -251,7 +258,7 @@ function ChatBotInterface() {
         </div>
       </div>
 
-      {/* 💬 Input Area */}
+      {/* ✍️ Input Section */}
       <div className="bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700 shadow-2xl">
         <div className="max-w-4xl mx-auto px-6 py-4">
           <div className="flex gap-3 items-end">
