@@ -1,35 +1,59 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+import { useState, useEffect } from "react";
+import "./App.css";
+import PensionPage from "./pages/PensionPage";
+import sessionService from "./service/sessionService";
+import type { conversation, Session } from "./types/Session";
 
 function App() {
-  const [count, setCount] = useState(0)
+  const [session, setSession] = useState<Session | null>(null);
+  const [conversation, setConversation] = useState<conversation | null>(null);
+  const [loading, setLoading] = useState(true);
 
-  return (
-    <>
-      <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
+  useEffect(() => {
+    const loadSessionAndConversation = async () => {
+      try {
+        const fetchedSession = await sessionService.fetchSession();
+        if (!fetchedSession?.session_id) {
+          throw new Error("Session fetch failed or invalid session_id");
+        }
+
+        setSession(fetchedSession);
+        localStorage.setItem("sessionId", fetchedSession.session_id as string);
+        console.log("Session ID:", fetchedSession.session_id);
+
+        const fetchedConversation = await sessionService.fetchConversation();
+        console.log("convo ID:", fetchedConversation);
+        if (!fetchedConversation?.id) {
+          throw new Error("Conversation fetch failed or invalid id");
+        }
+
+        setConversation(fetchedConversation);
+        localStorage.setItem("ConversationId", fetchedConversation.id as string);
+        console.log("Conversation ID:", fetchedConversation.id);
+
+      } catch (err) {
+        console.error("Error during session/conversation loading:", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadSessionAndConversation();
+  }, []);
+
+  if (loading) {
+    return <div className="text-center p-10">Loading session and conversation...</div>;
+  }
+
+  if (!session || !conversation) {
+    return (
+      <div className="text-center p-10 text-red-600">
+        Failed to load session or conversation.
       </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.tsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
-  )
+    );
+  }
+
+  return <PensionPage/>;
 }
 
-export default App
+export default App;
