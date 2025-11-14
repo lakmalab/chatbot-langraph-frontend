@@ -23,7 +23,8 @@ function ChatBotInterface() {
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
-  const sessionId = localStorage.getItem("SessionId") || "default_session";
+  //const sessionId = localStorage.getItem("SessionId") || "default_session";
+  const sessionId = "cd1db89b-5b4b-4613-863a-c8d932b1ca05"
   const conversationId = parseInt(localStorage.getItem("ConversationId") || "1");
 
   useEffect(() => {
@@ -71,6 +72,51 @@ function ChatBotInterface() {
         session_id: sessionId,
         conversation_id: conversationId,
       });
+
+      setMessages((prev) => [
+        ...prev.map((msg) =>
+          msg === userMessage ? { ...msg, status: Status.FINISHED } : msg
+        ),
+        response,
+      ]);
+    } catch (error: any) {
+      console.error("Error sending message:", error);
+      const errorMessage: Message = {
+        content: `❌ Sorry, I encountered an error: ${
+          error?.response?.data?.detail || error.message || "Unknown error"
+        }. Please try again.`,
+        sender: Sender.assistant,
+        status: Status.FINISHED,
+      };
+      setMessages((prev) => [
+        ...prev.map((msg) =>
+          msg === userMessage ? { ...msg, status: Status.FINISHED } : msg
+        ),
+        errorMessage,
+      ]);
+    } finally {
+      setIsLoading(false);
+      setIsTyping(false);
+    }
+  };
+  const handleSendConfirmMessage = async (messageText?: string) => {
+    const textToSend = messageText || inputValue.trim();
+    if (!textToSend || isLoading) return;
+
+    const userMessage: Message = {
+      content: textToSend,
+      sender: Sender.user,
+      status: Status.SENDING,
+    };
+
+    setMessages((prev) => [...prev, userMessage]);
+    setInputValue("");
+    setIsLoading(true);
+    setIsTyping(true);
+
+    try {
+       const response = await ChatService.sendConfirmation(sessionId, conversationId, true);
+        console.log("Confirmation response:", response);
 
       setMessages((prev) => [
         ...prev.map((msg) =>
@@ -146,7 +192,7 @@ function ChatBotInterface() {
 
   const handleConfirm = async (messageId: string) => {
     console.log("✅ Confirm clicked for:", messageId);
-    await handleSendMessage("Confirm");
+    await handleSendConfirmMessage("Confirm");
     setMessages((prev) =>
       prev.map((m, i) =>
         i.toString() === messageId ? { ...m, requiresConfirmation: false } : m
@@ -174,8 +220,8 @@ function ChatBotInterface() {
             <Sparkles className="w-5 h-5 text-white" />
           </div>
           <div>
-            <h1 className="text-xl font-bold text-gray-900 dark:text-white">Pension Assistant</h1>
-            <p className="text-xs text-gray-500 dark:text-gray-400">AI-powered pension advisor</p>
+            <h1 className="text-xl font-bold text-gray-900 dark:text-white">Library Assistant</h1>
+            <p className="text-xs text-gray-500 dark:text-gray-400">AI-powered Librarian</p>
           </div>
 
           <div className="ml-auto flex items-center gap-2 relative">
@@ -223,7 +269,7 @@ function ChatBotInterface() {
               <div className="w-20 h-20 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center shadow-2xl mb-6">
                 <Sparkles className="w-10 h-10 text-white" />
               </div>
-              <h2 className="text-2xl font-bold text-gray-800 dark:text-white mb-2">Welcome to Pension Assistant</h2>
+              <h2 className="text-2xl font-bold text-gray-800 dark:text-white mb-2">Welcome to Library Assistant</h2>
               <p className="text-gray-600 dark:text-gray-400 max-w-md">
                 I'm here to help you understand and calculate your pension benefits. Ask me anything about premiums, payouts, or eligibility!
               </p>
@@ -269,7 +315,7 @@ function ChatBotInterface() {
                 value={inputValue}
                 onChange={(e) => setInputValue(e.target.value)}
                 onKeyPress={handleKeyPress}
-                placeholder="Ask about premiums, pension amounts, eligibility..."
+                placeholder="Ask about Books, Library Locations..."
                 disabled={isLoading}
                 className="w-full px-5 py-3 pr-12 border-2 border-gray-200 dark:border-gray-600 rounded-2xl 
                            focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-200 

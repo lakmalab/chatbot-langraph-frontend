@@ -67,7 +67,7 @@ export class ChatService {
         sender: Sender.assistant,
         content: data.response || data.content || "",
         status: Status.FINISHED,
-        requiresConfirmation: data.metadata?.awaiting_confirmation || false,
+        requiresConfirmation: data.metadata?.requires_approval || false,
         confirmationData: data.metadata?.query_params,
       };
     } catch (error: any) {
@@ -88,13 +88,25 @@ export class ChatService {
     confirmed: boolean
   ): Promise<Message> => {
     const message: SendMessage = {
-      message: confirmed ? "Yes" : "No",
+      message: confirmed ? "true" : "false",
       session_id: sessionId,
       conversation_id: conversationId,
     };
-
-    return this.sendMessage(message);
+    const payload = {
+        session_id: message.session_id,
+        conversation_id: message.conversation_id || null,
+        approved: message.message.trim().toLowerCase() === "true",
+      };
+    const data = await apiRequest<any>(`/chat/approve-sql`, "POST", payload);
+    return {
+        sender: Sender.assistant,
+        content: data.response || data.content || "",
+        status: Status.FINISHED,
+        requiresConfirmation: data.metadata?.awaiting_confirmation || false,
+        confirmationData: data.metadata?.query_params,
+      };
   };
+
 
   abortConversation = async (Abort: AbortConversation): Promise<String> => {
     try {

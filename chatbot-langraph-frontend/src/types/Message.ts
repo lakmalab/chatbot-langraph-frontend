@@ -19,6 +19,11 @@ export interface SendMessage {
   conversation_id?: number | null;  // Can be number or null
   scheme_type?: string;
 }
+export interface SQLApprovalRequest {
+  session_id: string;
+  conversation_id?: number | null;  // Can be number or null
+  approved?: boolean;
+}
 
 export interface AbortConversation {
   session_id: string

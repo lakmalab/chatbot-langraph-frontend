@@ -3,7 +3,6 @@ import { BotMessageSquare, UserRoundPen, CheckCircle, XCircle, Sparkles } from "
 import type { Message } from "../types/Message";
 
 function formatMessage(content: string) {
-  // Convert markdown-like patterns to HTML
   return content
     .replace(/\n/g, "<br/>")
     .replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>")
