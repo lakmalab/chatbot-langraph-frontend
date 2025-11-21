@@ -1,8 +1,8 @@
 import type { Session, conversation, SessionData } from "../types/Session";
 import { apiRequest } from "./apiService";
 
-const sessionId = localStorage.getItem("sessionId");
-//const sessionId = "7ebba939-e14d-4ae8-928f-f05438e49e41"
+//const sessionId = localStorage.getItem("sessionId");
+const sessionId = "cd1db89b-5b4b-4613-863a-c8d932b1ca05"
 
 export class SessionService {
   fetchSession = async (): Promise<Session> => {
