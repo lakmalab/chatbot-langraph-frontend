@@ -10,7 +10,7 @@ function PensionPage() {
     <div className="bg-gradient-to-b from-[#e9f5db] to-[#a3c9a8] h-screen w-screen">
 
         <h1 className="flex items-center justify-center h-screen text-8xl font-extrabold text-center text-white">
-          Hi Welcome To AAIB
+          Hi Welcome To Libre
         </h1>
 
         <button

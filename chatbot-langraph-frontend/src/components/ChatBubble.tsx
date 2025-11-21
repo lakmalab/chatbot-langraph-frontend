@@ -1,9 +1,9 @@
 import { Sender, Status } from "../enums/enum";
 import { BotMessageSquare, UserRoundPen, CheckCircle, XCircle, Sparkles } from "lucide-react";
 import type { Message } from "../types/Message";
+import { useState } from "react";
 
 function formatMessage(content: string) {
-  // Convert markdown-like patterns to HTML
   return content
     .replace(/\n/g, "<br/>")
     .replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>")
@@ -12,12 +12,20 @@ function formatMessage(content: string) {
 }
 
 interface ChatBubbleProps extends Message {
-  onConfirm?: () => void;
+  onConfirm?: (email?: string, password?: string) => void;
   onCancel?: () => void;
 }
 
 function ChatBubble(prop: ChatBubbleProps) {
   const isBot = prop.sender === Sender.assistant;
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+
+  const handleConfirm = () => {
+    if (prop.onConfirm) {
+      prop.onConfirm(email, password);
+    }
+  };
 
   return (
     <div
@@ -88,27 +96,63 @@ function ChatBubble(prop: ChatBubbleProps) {
             </div>
           )}
 
-
           {isBot && prop.requiresConfirmation && (
-            <div className="flex gap-2 mt-4 pt-4 border-t border-gray-200 dark:border-gray-600">
-              <button
-                onClick={prop.onConfirm}
-                className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 bg-gradient-to-r from-green-500 to-emerald-600 
-                         hover:from-green-600 hover:to-emerald-700 text-white rounded-xl transition-all duration-200 
-                         font-semibold text-sm shadow-md hover:shadow-lg transform hover:scale-105 active:scale-95"
-              >
-                <CheckCircle className="w-4 h-4" />
-                Yes, Proceed
-              </button>
-              <button
-                onClick={prop.onCancel}
-                className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 bg-gradient-to-r from-red-500 to-rose-600 
-                         hover:from-red-600 hover:to-rose-700 text-white rounded-xl transition-all duration-200 
-                         font-semibold text-sm shadow-md hover:shadow-lg transform hover:scale-105 active:scale-95"
-              >
-                <XCircle className="w-4 h-4" />
-                No, Cancel
-              </button>
+            <div className="mt-4 pt-4 border-t border-gray-200 dark:border-gray-600">
+              {/* Email and Password Inputs */}
+              <div className="space-y-3 mb-4">
+                <div>
+                  <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
+                    Email Address
+                  </label>
+                  <input
+                    type="email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    placeholder="Enter your email"
+                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg 
+                             focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent
+                             bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
+                    Password
+                  </label>
+                  <input
+                    type="password"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    placeholder="Enter your password"
+                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg 
+                             focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent
+                             bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm"
+                  />
+                </div>
+              </div>
+
+              {/* Action Buttons */}
+              <div className="flex gap-2">
+                <button
+                  onClick={handleConfirm}
+                  disabled={!email || !password}
+                  className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 bg-gradient-to-r from-green-500 to-emerald-600 
+                           hover:from-green-600 hover:to-emerald-700 text-white rounded-xl transition-all duration-200 
+                           font-semibold text-sm shadow-md hover:shadow-lg transform hover:scale-105 active:scale-95
+                           disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
+                >
+                  <CheckCircle className="w-4 h-4" />
+                  Confirm & Proceed
+                </button>
+                <button
+                  onClick={prop.onCancel}
+                  className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 bg-gradient-to-r from-red-500 to-rose-600 
+                           hover:from-red-600 hover:to-rose-700 text-white rounded-xl transition-all duration-200 
+                           font-semibold text-sm shadow-md hover:shadow-lg transform hover:scale-105 active:scale-95"
+                >
+                  <XCircle className="w-4 h-4" />
+                  Cancel
+                </button>
+              </div>
             </div>
           )}
         </div>
